@@ -1,5 +1,5 @@
-// Demo REMUBRUTA Offline: Info + Historial de Remuneraciones con escenarios BRUTO / Esc. Bancos / Esc. IPC
-let TODOS=[]; let REMU={}; let seleccionado=null; let modo='todos';
+// REMUBRUTA v2 — Escenarios: Mercado (Bancos, IPC, Alyc), Alchemy, Bandas (MIN/MID/MAX)
+let TODOS=[]; let REMU={}; let seleccionado=null; let modo='mercado';
 
 async function boot(){
   const c = await fetch('./data/colaboradores.json').then(r=>r.json());
@@ -74,10 +74,9 @@ function renderFicha(d){
       <h3>📊 Historial de Remuneraciones</h3>
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
         <div class="seg">
-          <button onclick="setModo('bruto')" id="m-bruto">BRUTO</button>
-          <button onclick="setModo('bancos')" id="m-bancos">Esc. Bancos</button>
-          <button onclick="setModo('ipc')" id="m-ipc">Esc. IPC</button>
-          <button onclick="setModo('todos')" id="m-todos" class="on">Todos</button>
+          <button onclick="setModo('mercado')" id="m-mercado" class="on">Mercado</button>
+          <button onclick="setModo('bandas')" id="m-bandas">Bandas</button>
+          <button onclick="setModo('alchemy')" id="m-alchemy">Alchemy</button>
         </div>
       </div>
       <div id="remu-tbl" style="margin-top:10px"></div>
@@ -87,15 +86,15 @@ function renderFicha(d){
   renderRemu(d.legajo);
 }
 
-function setModo(m){ modo=m; ['m-bruto','m-bancos','m-ipc','m-todos'].forEach(id=>{
+function setModo(m){ modo=m; ['m-mercado','m-bandas','m-alchemy'].forEach(id=>{
   const el=document.getElementById(id); if(!el) return; el.classList.toggle('on', id==='m-'+m);
 }); drawChart('remu-svg', (REMU[String(seleccionado.legajo)]||[])); }
 
 function renderRemu(legajo){
   const rows=(REMU[String(legajo)]||[]).slice().sort((a,b)=> new Date(a.periodo)-new Date(b.periodo));
   const f=n=>'$'+Math.round(+n||0).toLocaleString('es-AR');
-  const tbl=['<table class="tabla"><thead><tr><th>Periodo</th><th>BRUTO</th><th>Esc. Bancos</th><th>Esc. IPC</th></tr></thead><tbody>'];
-  rows.forEach(r=> tbl.push(`<tr><td>${r.periodo}</td><td><strong>${f(r.bruto)}</strong></td><td>${f(r.esc_bancos)}</td><td>${f(r.esc_ipc)}</td></tr>`));
+  const tbl=['<table class="tabla"><thead><tr><th>Periodo</th><th>BRUTO</th><th>Bancos</th><th>IPC</th><th>Alyc</th><th>Alchemy</th><th>MIN</th><th>MID</th><th>MAX</th></tr></thead><tbody>'];
+  rows.forEach(r=> tbl.push(`<tr><td>${r.periodo}</td><td><strong>${f(r.sueldo)}</strong></td><td>${f(r.banco)}</td><td>${f(r.ipc)}</td><td>${f(r.alyc)}</td><td>${f(r.alchemy)}</td><td>${f(r.min)}</td><td>${f(r.mid)}</td><td>${f(r.max)}</td></tr>`));
   tbl.push('</tbody></table>'); document.getElementById('remu-tbl').innerHTML=tbl.join('');
   drawChart('remu-svg', rows);
 }
@@ -104,44 +103,41 @@ function drawChart(id, rows){
   const svg=document.getElementById(id); svg.innerHTML='';
   const W=800,H=320, pad={l:48,r:12,t:10,b:24};
   const X= (i,n)=> pad.l + (i*(W-pad.l-pad.r))/Math.max(1,n-1);
-  const colors={'bruto':'#3f51b5','esc_bancos':'#0F9D58','esc_ipc':'#DB4437'};
-  const seriesOrder = (modo==='todos')? ['bruto','esc_bancos','esc_ipc'] : [modo==='bancos'?'esc_bancos':(modo==='ipc'?'esc_ipc':'bruto')];
-
-  const allY = seriesOrder.flatMap(k=> rows.map(r=> +r[k]||0));
+  let series=[];
+  if(modo==='mercado'){
+    series=[{k:'sueldo',n:'Sueldo Bruto',c:'#3f51b5'},{k:'banco',n:'Esc. Bancos',c:'#0F9D58'},{k:'ipc',n:'Esc. IPC',c:'#DB4437'},{k:'alyc',n:'Esc. Alyc',c:'#FF9800'}];
+  }else if(modo==='bandas'){
+    series=[{k:'sueldo',n:'Sueldo Bruto',c:'#3f51b5'},{k:'min',n:'MIN',c:'#00796B'},{k:'mid',n:'MID',c:'#455A64'},{k:'max',n:'MAX',c:'#6A1B9A'}];
+  }else{
+    series=[{k:'sueldo',n:'Sueldo Bruto',c:'#3f51b5'},{k:'alchemy',n:'Alchemy',c:'#1E88E5'}];
+  }
+  const allY = series.flatMap(s=> rows.map(r=> +r[s.k]||0));
   const ymin = Math.min(...allY), ymax = Math.max(...allY);
   const Y = v => pad.t + (H-pad.t-pad.b) * (1 - (v - ymin) / Math.max(1,(ymax - ymin)));
 
-  // axes
   const ax = document.createElementNS('http://www.w3.org/2000/svg','path');
   ax.setAttribute('d', `M${pad.l} ${pad.t} V${H-pad.b} H${W-pad.r}`);
   ax.setAttribute('stroke','#999'); ax.setAttribute('fill','none'); ax.setAttribute('stroke-width','1');
   svg.appendChild(ax);
 
-  // x labels
   rows.forEach((r,i)=>{
     if(i%Math.ceil(rows.length/8)!==0 && i!==rows.length-1) return;
     const tx=document.createElementNS('http://www.w3.org/2000/svg','text');
     tx.setAttribute('x', X(i,rows.length)); tx.setAttribute('y', H-6);
-    tx.setAttribute('text-anchor','middle'); tx.setAttribute('font-size','10'); tx.textContent = (r.periodo||'').slice(0,7);
+    tx.setAttribute('text-anchor','middle'); tx.setAttribute('font-size','10'); tx.textContent=(r.periodo||'').slice(0,7);
     svg.appendChild(tx);
   });
 
-  seriesOrder.forEach((k,idx)=>{
+  series.forEach((s,di)=>{
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    let d=''; rows.forEach((r,i)=>{
-      const x=X(i,rows.length), y=Y(+r[k]||0); d += (i? ' L':'M') + x + ' ' + y;
-    });
-    path.setAttribute('d',d); path.setAttribute('fill','none'); path.setAttribute('stroke', colors[k]); path.setAttribute('stroke-width','2');
+    let d=''; rows.forEach((r,i)=>{ const x=X(i,rows.length), y=Y(+r[s.k]||0); d += (i?' L':'M')+x+' '+y; });
+    path.setAttribute('d', d); path.setAttribute('fill','none'); path.setAttribute('stroke', s.c); path.setAttribute('stroke-width','2');
     svg.appendChild(path);
-
-    // legend
-    const names={'bruto':'BRUTO','esc_bancos':'Esc. Bancos','esc_ipc':'Esc. IPC'};
-    const y=pad.t+6 + idx*14;
+    const y=pad.t+6 + di*14;
     const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
-    rect.setAttribute('x', W-pad.r-130); rect.setAttribute('y', y-9); rect.setAttribute('width',10); rect.setAttribute('height',10);
-    rect.setAttribute('fill', colors[k]); svg.appendChild(rect);
+    rect.setAttribute('x', W-pad.r-150); rect.setAttribute('y', y-9); rect.setAttribute('width',10); rect.setAttribute('height',10); rect.setAttribute('fill', s.c); svg.appendChild(rect);
     const tx=document.createElementNS('http://www.w3.org/2000/svg','text');
-    tx.setAttribute('x', W-pad.r-114); tx.setAttribute('y', y); tx.setAttribute('font-size','11'); tx.textContent=names[k]; svg.appendChild(tx);
+    tx.setAttribute('x', W-pad.r-134); tx.setAttribute('y', y); tx.setAttribute('font-size','11'); tx.textContent=s.n; svg.appendChild(tx);
   });
 }
 
