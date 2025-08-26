@@ -3,39 +3,38 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>People Review — Demo Anon</title>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>People Review — Demo REMUBRUTA (Offline)</title>
   <style>
     *{box-sizing:border-box} body{background:#f5f7fa;color:#333;line-height:1.6;padding:20px;font-family:Segoe UI,Tahoma,Verdana,sans-serif}
     .container{max-width:1200px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.08);padding:30px}
     h2{color:#1a237e;text-align:center;border-bottom:2px solid #e8eaf6;padding-bottom:15px;margin-bottom:30px}
     h3{color:#1a237e;border-left:5px solid #3f51b5;padding-left:12px;margin:20px 0}
     label{color:#3f51b5;font-weight:600;margin-bottom:6px;display:block}
-    input,select,textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;background:#f9f9f9;margin-bottom:12px}
+    input,select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;background:#f9f9f9;margin-bottom:12px}
     button{background:#3f51b5;color:#fff;border:none;border-radius:6px;padding:10px 16px;cursor:pointer}
     button:hover{background:#303f9f}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-    .info-box{background:#f8f9ff;border-left:4px solid #3f51b5;border-radius:8px;padding:14px}
     .filtros-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;background:#f8f9ff;padding:16px;border-radius:10px}
     .lista-colaboradores{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
     .tarjeta{background:#fff;border-left:4px solid #3f51b5;border-radius:8px;padding:14px;box-shadow:0 2px 5px rgba(0,0,0,.05);cursor:pointer}
     .tarjeta:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.1)}
     .row{display:flex;justify-content:space-between;gap:8px}
     .badge{background:#e8eaf6;color:#3f51b5;border-radius:12px;padding:2px 8px;font-size:12px}
-    .dash{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
-    .panel{border:1px solid #e8eaf6;border-radius:10px;padding:18px;background:#f9faff}
-    .heat{height:22px;background:linear-gradient(to right,#f00,#f90,#ff0,#0f0);border-radius:6px;position:relative}
-    .pin{position:absolute;top:-5px;width:3px;height:32px;background:#1a237e}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+    .info-box{background:#f8f9ff;border-left:4px solid #3f51b5;border-radius:8px;padding:14px}
+    .panel{border:1px solid #e8eaf6;border-radius:10px;padding:18px;background:#f9faff;margin-top:16px}
     .tabla{width:100%;border-collapse:collapse;font-size:14px}
     .tabla th,.tabla td{border:1px solid #ddd;padding:8px;text-align:center}
     .tabla th{background:#3f51b5;color:#fff}
+    .seg{display:flex;gap:8px;flex-wrap:wrap}
+    .seg button{background:#e8eaf6;color:#1a237e}
+    .seg button.on{background:#3f51b5;color:#fff}
+    .svg-wrap{width:100%;overflow:hidden;margin-top:8px}
     @media(max-width:900px){.dash{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>People Review — Demo (Identidades Anonimizadas)</h2>
+    <h2>People Review — Demo REMUBRUTA (100% Offline)</h2>
     <div class="section">
       <h3>🔍 Buscar Colaborador</h3>
       <div class="filtros-grid">
@@ -53,11 +52,6 @@
     <div id="contenido">
       <div style="text-align:center;padding:40px 20px;color:#666">
         <h3>Seleccione un colaborador para visualizar su información</h3>
-        <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#3f51b5" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
       </div>
     </div>
   </div>
