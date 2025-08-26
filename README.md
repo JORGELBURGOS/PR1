@@ -1,42 +1,41 @@
 
-# People Review — REMUBRUTA desde Google Sheets (100% Offline)
+# People Review — REMUBRUTA desde Google Sheets (CSV, v3, **estricto**)
 
-Este paquete te permite **generar la demo usando los valores reales de tu hoja**:
-- Toma **REMUBRUTA** (histórico por período) y **Listado Legajos** (datos del colaborador)
-- **Selecciona 10 legajos**, **enmascara nombres y apellidos** (alias) y respeta **exactamente los períodos e importes**
-- No usa CDNs ni llamadas externas: queda todo en `/data/*.json`
+**Objetivo:** demo 100% offline que usa **tus valores reales** de *REMUBRUTA* y *Listado Legajos*
+(10 colaboradores con nombres alias). Reglas que se cumplen:
 
-## Pasos (2 minutos)
+- Los **periodos e importes** son exactamente los de tu hoja (nada inventado).
+- En el **primer mes** de cada legajo, **Bancos/IPC/Alyc/Alchemy = Sueldo Bruto** (si no lo estaban, se corrige SOLO esa fila).
+- En **Bandas**, SIEMPRE se compara contra **Sueldo Bruto** (el gráfico muestra Sueldo + MIN/MID/MAX).
+- Escenarios disponibles: **Mercado** (Bancos, IPC, Alyc), **Bandas** (MIN/MID/MAX), **Alchemy** (Sueldo vs Alchemy).
 
-1. En tu Google Sheet **abrí** las pestañas:
-   - `REMUBRUTA`
-   - `Listado Legajos`
-2. `Archivo → Descargar → Valores separados por comas (.csv)` de cada pestaña.
-3. Guardá los archivos en la raíz del proyecto con estos nombres:
-   - `REMUBRUTA.csv`
-   - `Listado_Legajos.csv`
-4. (Opcional) Si querés elegir manualmente los 10 legajos, abrí `scripts/ingest_from_csv.py` y completá la lista `LEGajos_SELECCIONADOS = ["11","20",...]`.
-5. Ejecutá el script de ingesta:
+## Uso
+
+1. En Google Sheets, exportá estas pestañas como CSV:
+   - `REMUBRUTA` → `REMUBRUTA.csv`
+   - `Listado Legajos` → `Listado_Legajos.csv`
+2. Ponelos en la **raíz** del proyecto.
+3. Elegí legajos (opcional): editá `scripts/ingest_from_csv.py` y completá `LEGajos_SELECCIONADOS = [...]`.
+   - Sino, el script toma **los 10 con más historia**.
+4. Corré la ingesta:
    ```bash
    cd scripts
    python3 ingest_from_csv.py
    ```
-   Verás el resultado en:
-   - `data/colaboradores.json`
-   - `data/remubruta.json`
+   Salida: `data/colaboradores.json` y `data/remubruta.json`.
+5. Local:
+   ```bash
+   python3 -m http.server
+   # abrir http://localhost:8000
+   ```
+6. Vercel: Importá repo → Framework “Other” → Build vacío → Output `/`.
 
-6. Probá localmente:
-   - Con un server estático (por ejemplo): `python3 -m http.server` y abrí `http://localhost:8000`.
-7. Deploy a Vercel:
-   - Importás el repo, build vacío, output `/`.
+### Helper (opcional)
+Listado de legajos por longitud de historia:
+```bash
+cd scripts
+python3 list_legajos_by_history.py
+```
 
-## Qué incluye
-
-- `index.html`, `app.js` — Interfaz con **selector de escenario**: Mercado (Bancos, IPC, Alyc), Bandas (MIN/MID/MAX) y Alchemy.
-- `scripts/ingest_from_csv.py` — Ingresa desde tus CSVs reales y genera la data exacta.
-- `/data/*.json` — Se genera desde tu hoja; **no** se versiona ningún dato real tuyo.
-
-## Notas
-
-- El script mapea columnas por palabras clave. Si algún encabezado difiere mucho, te indico cómo ajustarlo.
-- Para **enmascarar también el `Jefe`**, podemos extender el mapeo para que los jefes que aparezcan en `Listado Legajos` también reciban alias consistentes.
+### Alias de jefes
+Si el **jefe** pertenece a los 10 seleccionados (o su nombre aparece mapeado), se aliasa también para no filtrar identidades.

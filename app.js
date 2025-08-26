@@ -1,4 +1,4 @@
-// Demo offline desde CSV (REMUBRUTA + Listado Legajos)
+// REMUBRUTA v3 — escenarios: Mercado (Bancos, IPC, Alyc), Bandas (MIN/MID/MAX, SIEMPRE con Sueldo), Alchemy (Sueldo + Alchemy)
 let TODOS=[]; let REMU={}; let seleccionado=null; let modo='mercado';
 
 async function boot(){
@@ -34,7 +34,7 @@ function filtrar(){
     const okN=!q || n.includes(q);
     const okS=!s || c.sector===s; const okA=!a || c.area===a; const okJ=!j || c.jefe===j;
     return okN&&okS&&okA&&okJ;
-  }).sort((A,B)=> (parseFloat(B.nivel||0))-(parseFloat(A.nivel||0)));
+  });
   renderResultados(res);
 }
 function renderResultados(items){
@@ -50,7 +50,7 @@ function renderResultados(items){
   }); html+='</div>'; cont.innerHTML=html;
 }
 function seleccionar(legajo){ seleccionado=TODOS.find(x=>String(x.legajo)===String(legajo)); if(!seleccionado) return; renderFicha(seleccionado); }
-function info(label,value){ const v=(value==null||value==='')?'No especificado':value; return `<div class="info-box"><label>${label}</label><div>${v}</div></div>`; }
+function info(label,value){ const v=(value==null||value==='')?'—':value; return `<div class="info-box"><label>${label}</label><div>${v}</div></div>`; }
 
 function renderFicha(d){
   const cont=document.getElementById('contenido');
@@ -65,7 +65,7 @@ function renderFicha(d){
       </div>
       <div class="grid">
         ${info('Sector', d.sector)} ${info('Área', d.area)} ${info('Rango', d.rango)} ${info('Jefe', d.jefe)}
-        ${info('ANTIGUEDAD', `${d.ANTIGUEDAD||0} años`)} ${info('Nivel Salarial', d['Nivel Salarial']||'—')}
+        ${info('ANTIGUEDAD', d.ANTIGUEDAD)} ${info('Nivel Salarial', d['Nivel Salarial'])}
       </div>
     </div>
 
@@ -130,7 +130,7 @@ function drawChart(id, rows){
   series.forEach((s,di)=>{
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
     let d=''; rows.forEach((r,i)=>{ const x=X(i,rows.length), y=Y(+r[s.k]||0); d += (i?' L':'M')+x+' '+y; });
-    path.setAttribute('d', d); path.setAttribute('fill','none'); path.setAttribute('stroke', s.c); path.setAttribute('stroke-width','2');
+    path.setAttribute('d', d); path.setAttribute('fill','none'); path.setAttribute('stroke', s.c); path.setAttribute('stroke-width', '2');
     svg.appendChild(path);
     const y=pad.t+6 + di*14;
     const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
