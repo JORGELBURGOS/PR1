@@ -1,4 +1,4 @@
-// REMUBRUTA v2 — Escenarios: Mercado (Bancos, IPC, Alyc), Alchemy, Bandas (MIN/MID/MAX)
+// Demo offline desde CSV (REMUBRUTA + Listado Legajos)
 let TODOS=[]; let REMU={}; let seleccionado=null; let modo='mercado';
 
 async function boot(){
@@ -65,8 +65,7 @@ function renderFicha(d){
       </div>
       <div class="grid">
         ${info('Sector', d.sector)} ${info('Área', d.area)} ${info('Rango', d.rango)} ${info('Jefe', d.jefe)}
-        ${info('ANTIGUEDAD', `${d.ANTIGUEDAD||0} años`)} ${info('Nivel Salarial', d['Nivel Salarial'])}
-        ${info('Relación con Alguien', d['Relación con Alguien']||'No especificado')} ${info('Franja Etaria', d['Franja Etaria']||'No especificado')}
+        ${info('ANTIGUEDAD', `${d.ANTIGUEDAD||0} años`)} ${info('Nivel Salarial', d['Nivel Salarial']||'—')}
       </div>
     </div>
 
